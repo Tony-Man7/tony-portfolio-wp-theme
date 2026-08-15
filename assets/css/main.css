@@ -1,0 +1,660 @@
+/* ==========================================================================
+   Tony Dev Portfolio — main.css
+   Palette: Ink #10121a / Surface #181b27 / Fog #e9e7e2 / Amber #f5b942 / Slate #7b8299
+   Display: Space Grotesk · Body: Inter · Mono/labels: JetBrains Mono
+   Signature: terminal-prompt section labels ($ whoami, $ ls ./projects ...)
+   ========================================================================== */
+
+:root {
+	--ink: #1a191d;
+	--surface: #232227;
+	--surface-2: #2b2a30;
+	--fog: #ececec;
+	--amber: #f5b942;
+	--slate: #98979d;
+	--line: #322f36;
+
+	--font-display: 'Space Grotesk', sans-serif;
+	--font-body: 'Inter', sans-serif;
+	--font-mono: 'JetBrains Mono', monospace;
+
+	--max-w: 1120px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+	html { scroll-behavior: auto; }
+	* { animation: none !important; transition: none !important; }
+}
+
+body {
+	margin: 0;
+	background: var(--ink);
+	color: var(--fog);
+	font-family: var(--font-body);
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+img { max-width: 100%; display: block; }
+
+a { color: inherit; text-decoration: none; }
+
+.tdp-logo img { height: 22px; width: auto; display: block; }
+
+.tdp-wrap {
+	max-width: var(--max-w);
+	margin: 0 auto;
+	padding: 0 24px;
+}
+
+.tdp-eyebrow {
+	font-family: var(--font-mono);
+	font-size: 13px;
+	color: var(--amber);
+	letter-spacing: 0.02em;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+.tdp-eyebrow::before {
+	content: "$";
+	animation: tdp-blink 1s step-end infinite;
+}
+
+@keyframes tdp-blink {
+	0%, 49% { opacity: 0.6; }
+	50%, 100% { opacity: 0; }
+}
+
+/* Scroll reveal — fade + slight rise, triggered once via IntersectionObserver.
+   Uses opacity/transform only, so it never affects layout or page height. */
+.tdp-reveal {
+	opacity: 0;
+	transform: translateY(24px);
+	transition: opacity 1.1s ease-out, transform 1.1s ease-out;
+	transition-delay: var(--tdp-reveal-delay, 0s);
+}
+
+.tdp-reveal.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.tdp-timeline-item.tdp-reveal {
+	transition-duration: 0.6s;
+}
+
+h1, h2, h3, h4 {
+	font-family: var(--font-display);
+	font-weight: 700;
+	line-height: 1.15;
+	margin: 0 0 16px;
+}
+
+h2 { font-size: clamp(28px, 4vw, 40px); }
+h3 { font-size: 20px; }
+
+p { margin: 0 0 16px; color: var(--slate); }
+
+/* ---------- Header / nav ---------- */
+.tdp-header {
+	position: sticky;
+	top: 0;
+	z-index: 50;
+	background: rgba(26, 25, 29, 0.85);
+	backdrop-filter: blur(8px);
+	border-bottom: 1px solid var(--line);
+}
+
+.tdp-header-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 18px 0;
+}
+
+.tdp-logo {
+	font-family: var(--font-mono);
+	font-weight: 500;
+	font-size: 15px;
+}
+
+.tdp-logo .tdp-prompt { color: var(--amber); }
+
+.tdp-nav-links {
+	list-style: none;
+	display: flex;
+	gap: 28px;
+	margin: 0;
+	padding: 0;
+	font-family: var(--font-mono);
+	font-size: 13px;
+}
+
+.tdp-nav-links a { color: var(--slate); transition: color 0.15s ease; }
+.tdp-nav-links a:hover { color: var(--amber); }
+
+.tdp-nav-toggle { display: none; }
+
+@media (max-width: 720px) {
+	.tdp-nav-links { position: fixed; inset: 62px 0 auto 0; flex-direction: column; background: var(--surface); padding: 20px 24px; gap: 16px; transform: translateY(-8px); opacity: 0; pointer-events: none; transition: all 0.2s ease; }
+	.tdp-nav-links.is-open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+	.tdp-nav-toggle { display: inline-flex; background: none; border: 1px solid var(--line); color: var(--fog); font-family: var(--font-mono); padding: 6px 10px; border-radius: 4px; }
+}
+
+/* ---------- Hero ---------- */
+.tdp-hero {
+	position: relative;
+	overflow: hidden;
+	padding: 160px 0 140px;
+	text-align: center;
+}
+
+.tdp-hero h1 {
+	font-size: clamp(44px, 10vw, 110px);
+	max-width: 900px;
+	margin: 0 auto 16px;
+	text-transform: uppercase;
+}
+
+.tdp-hero-role {
+	font-family: var(--font-mono);
+	color: var(--slate);
+	font-size: 16px;
+	max-width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.tdp-hero-meta {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(140px, 1fr));
+	max-width: 620px;
+	gap: 32px;
+	margin: 40px auto 0;
+	font-family: var(--font-mono);
+	font-size: 13px;
+	text-align: center;
+}
+
+.tdp-hero-meta div strong {
+	display: block;
+	color: var(--amber);
+	font-size: 22px;
+	font-family: var(--font-display);
+}
+
+/* ---------- Section shell ---------- */
+.tdp-section { padding: 90px 0; }
+.tdp-section:last-of-type { border-bottom: none; }
+
+/* ---------- Expertise ---------- */
+.tdp-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+.tdp-card {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	padding: 28px;
+}
+
+.tdp-card.tdp-reveal {
+	transition: opacity 1.1s ease-out, transform 1.1s ease-out, border-color 0.15s ease, translate 0.15s ease, box-shadow 0.15s ease;
+	transition-delay: var(--tdp-reveal-delay, 0s), var(--tdp-reveal-delay, 0s), 0s, 0s, 0s;
+}
+
+.tdp-card:hover {
+	border-color: var(--amber);
+	translate: 0 -2px;
+	box-shadow: 0 12px 24px -12px rgba(245, 185, 66, 0.2);
+}
+
+.tdp-card .tdp-tag {
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--amber);
+	display: block;
+	margin-bottom: 10px;
+}
+
+/* ---------- Work / projects ---------- */
+/* True masonry via the "fine-grained grid-auto-rows" technique:
+   grid-auto-rows is set to a small unit, and JS computes how many
+   rows each card should span based on its real rendered height
+   (setGridRowSpans() below). grid-auto-flow: dense lets shorter
+   neighboring items get "filled in" by later cards instead of
+   leaving empty gaps — the visual masonry effect. */
+.tdp-work-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-auto-rows: 8px;
+	grid-auto-flow: dense;
+	gap: 20px;
+}
+
+.tdp-project-card {
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	align-self: start;
+}
+
+.tdp-project-card.tdp-reveal {
+	transition: opacity 1.1s ease-out, transform 1.1s ease-out, border-color 0.15s ease, translate 0.15s ease, box-shadow 0.15s ease;
+	transition-delay: var(--tdp-reveal-delay, 0s), var(--tdp-reveal-delay, 0s), 0s, 0s, 0s;
+}
+
+.tdp-project-card:hover {
+	border-color: var(--amber);
+	translate: 0 -4px;
+	box-shadow: 0 16px 28px -14px rgba(245, 185, 66, 0.25);
+}
+
+/* Masonry-style rhythm on a 3-column grid: 3 normal cards fill row 1,
+   then every 5th card (4, 9, 14...) becomes a "featured" card spanning
+   2 columns, paired with 1 normal card auto-filling the 3rd column —
+   pure CSS, no JS, and it keeps working automatically as more projects
+   load via "See more". Pattern: [N N N] [BIG N] [N N N] [BIG N] ... */
+.tdp-project-card:nth-child(5n+4) {
+	grid-column: span 2;
+}
+
+.tdp-project-card:nth-child(5n+4) .tdp-project-thumb {
+	aspect-ratio: 16 / 9;
+}
+
+.tdp-project-thumb { aspect-ratio: 16/10; background: var(--surface-2); overflow: hidden; }
+.tdp-project-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.tdp-project-card:hover .tdp-project-thumb img { transform: scale(1.05); }
+
+.tdp-project-body { padding: 22px; }
+
+.tdp-project-meta {
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--slate);
+	display: grid;
+	grid-template-columns: 1fr auto;
+	column-gap: 14px;
+	align-items: start;
+	margin-bottom: 12px;
+}
+
+.tdp-project-tech {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 10px;
+}
+
+.tdp-tech-chip {
+	background: var(--surface-2);
+	border: 1px solid var(--line);
+	color: var(--slate);
+	padding: 3px 10px;
+	border-radius: 20px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+}
+
+.tdp-project-cat {
+	display: inline-block;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	color: var(--ink);
+	background: var(--amber);
+	padding: 3px 9px;
+	border-radius: 3px;
+	margin-bottom: 12px;
+}
+
+.tdp-empty-state {
+	font-family: var(--font-mono);
+	font-size: 14px;
+	color: var(--slate);
+	border: 1px dashed var(--line);
+	border-radius: 8px;
+	padding: 40px;
+	text-align: center;
+}
+
+/* ---------- Experience timeline ---------- */
+.tdp-timeline { border-left: 2px solid var(--line); padding-left: 32px; display: flex; flex-direction: column; gap: 40px; }
+
+.tdp-timeline-item { position: relative; }
+
+.tdp-timeline-item::before {
+	content: "";
+	position: absolute;
+	left: -38px;
+	top: 4px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--amber);
+}
+
+.tdp-timeline-date { font-family: var(--font-mono); font-size: 12px; color: var(--amber); margin-bottom: 6px; display: block; }
+
+.tdp-timeline-item h3 { margin-bottom: 4px; }
+
+.tdp-timeline-company { color: var(--slate); font-size: 14px; margin-bottom: 10px; }
+
+/* ---------- Contact ---------- */
+.tdp-contact { text-align: left; border-top: 1px solid var(--line);}
+
+.tdp-contact-links { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 28px; }
+
+.tdp-contact-links a {
+	font-family: var(--font-mono);
+	font-size: 13px;
+	border: 1px solid var(--line);
+	padding: 10px 18px;
+	border-radius: 6px;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.tdp-contact-links a:hover { border-color: var(--amber); color: var(--amber); }
+
+.tdp-btn-primary {
+	background: var(--amber) !important;
+	color: var(--ink) !important;
+	border-color: var(--amber) !important;
+	font-weight: 500;
+}
+
+/* ---------- Footer ---------- */
+.tdp-footer {
+	padding: 32px 0;
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--slate);
+	text-align: center;
+}
+
+/* ---------- Single project ---------- */
+.tdp-single-project { padding: 140px 0 90px; }
+.tdp-single-project .tdp-project-thumb { aspect-ratio: auto; margin-bottom: 32px; border-radius: 8px; }
+.tdp-single-meta-row { display: flex; gap: 28px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 13px; margin-bottom: 32px; }
+.tdp-single-meta-row div strong { display: block; color: var(--amber); font-size: 15px; font-family: var(--font-body); }
+.tdp-back-link { font-family: var(--font-mono); font-size: 13px; color: var(--slate); }
+.tdp-back-link:hover { color: var(--amber); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+	.tdp-grid-3 { grid-template-columns: 1fr; }
+	.tdp-work-grid { grid-template-columns: 1fr; }
+	.tdp-hero { padding: 100px 0 60px; }
+	.tdp-section { padding: 60px 0; }
+}
+
+/* ---------- Focus visibility ---------- */
+a:focus-visible, button:focus-visible {
+	outline: 2px solid var(--amber);
+	outline-offset: 2px;
+}
+
+/* ---------- AI Chat Widget ---------- */
+.tdp-ai-widget {
+	position: fixed;
+	right: 24px;
+	bottom: 24px;
+	z-index: 100;
+}
+
+.tdp-ai-toggle {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--amber);
+	color: var(--ink);
+	border: none;
+	font-family: var(--font-mono);
+	font-size: 20px;
+	font-weight: 700;
+	cursor: pointer;
+	box-shadow: 0 8px 20px -6px rgba(245, 185, 66, 0.5);
+	transition: transform 0.15s ease;
+}
+
+.tdp-ai-toggle:hover {
+	transform: scale(1.06);
+}
+
+.tdp-ai-toggle--pulse {
+	animation: tdp-ai-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes tdp-ai-pulse {
+	0%, 100% { box-shadow: 0 8px 20px -6px rgba(245, 185, 66, 0.5); }
+	50% { box-shadow: 0 8px 28px -4px rgba(245, 185, 66, 0.9), 0 0 0 8px rgba(245, 185, 66, 0.12); }
+}
+
+.tdp-ai-panel {
+	position: absolute;
+	right: 0;
+	bottom: 72px;
+	width: 360px;
+	max-width: calc(100vw - 48px);
+	max-height: 560px;
+	display: flex;
+	flex-direction: column;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: 0 24px 48px -20px rgba(0, 0, 0, 0.6);
+}
+
+.tdp-ai-panel[hidden] {
+	display: none;
+}
+
+.tdp-ai-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--line);
+	font-family: var(--font-mono);
+	font-size: 13px;
+	color: var(--amber);
+}
+
+.tdp-ai-close {
+	background: none;
+	border: none;
+	color: var(--slate);
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.tdp-ai-close:hover {
+	color: var(--fog);
+}
+
+.tdp-ai-tabs {
+	display: flex;
+	border-bottom: 1px solid var(--line);
+}
+
+.tdp-ai-tab {
+	flex: 1;
+	padding: 10px;
+	background: none;
+	border: none;
+	color: var(--slate);
+	font-family: var(--font-mono);
+	font-size: 12px;
+	cursor: pointer;
+	border-bottom: 2px solid transparent;
+}
+
+.tdp-ai-tab.is-active {
+	color: var(--amber);
+	border-bottom-color: var(--amber);
+}
+
+.tdp-ai-view {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-height: 0;
+}
+
+.tdp-ai-view[hidden] {
+	display: none;
+}
+
+.tdp-ai-thread {
+	flex: 1;
+	overflow-y: auto;
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-height: 260px;
+	max-height: 360px;
+}
+
+.tdp-ai-message {
+	font-size: 13px;
+	line-height: 1.5;
+	padding: 10px 12px;
+	border-radius: 8px;
+	max-width: 85%;
+	white-space: pre-wrap;
+}
+
+.tdp-ai-message--bot {
+	background: var(--surface-2);
+	color: var(--fog);
+	align-self: flex-start;
+}
+
+.tdp-ai-message--user {
+	background: var(--amber);
+	color: var(--ink);
+	align-self: flex-end;
+}
+
+.tdp-ai-message--error {
+	background: transparent;
+	border: 1px solid #a04b4b;
+	color: #e0a3a3;
+	align-self: flex-start;
+}
+
+.tdp-ai-typing {
+	align-self: flex-start;
+	display: flex;
+	gap: 4px;
+	padding: 10px 12px;
+}
+
+.tdp-ai-typing span {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--slate);
+	animation: tdp-ai-bounce 1s infinite ease-in-out;
+}
+
+.tdp-ai-typing span:nth-child(2) { animation-delay: 0.15s; }
+.tdp-ai-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes tdp-ai-bounce {
+	0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+	30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.tdp-ai-input-row {
+	display: flex;
+	gap: 8px;
+	padding: 12px;
+	border-top: 1px solid var(--line);
+}
+
+.tdp-ai-input-row input {
+	flex: 1;
+	background: var(--surface-2);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 10px 12px;
+	color: var(--fog);
+	font-family: var(--font-body);
+	font-size: 13px;
+}
+
+.tdp-ai-input-row input:focus {
+	outline: none;
+	border-color: var(--amber);
+}
+
+.tdp-ai-send {
+	width: 38px;
+	border-radius: 6px;
+	border: none;
+	background: var(--amber);
+	color: var(--ink);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.tdp-ai-send:disabled,
+.tdp-ai-input-row input:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.tdp-ai-jobmatch {
+	padding: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.tdp-ai-jobmatch textarea {
+	min-height: 140px;
+	resize: vertical;
+	background: var(--surface-2);
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	padding: 10px 12px;
+	color: var(--fog);
+	font-family: var(--font-body);
+	font-size: 13px;
+}
+
+.tdp-ai-jobmatch textarea:focus {
+	outline: none;
+	border-color: var(--amber);
+}
+
+.tdp-ai-job-result {
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--fog);
+	white-space: pre-wrap;
+}
+
+.tdp-ai-job-result.is-error {
+	color: #e0a3a3;
+}
+
+@media (max-width: 480px) {
+	.tdp-ai-panel {
+		width: calc(100vw - 24px);
+		right: -12px;
+	}
+}
