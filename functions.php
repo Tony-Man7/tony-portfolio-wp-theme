@@ -327,6 +327,22 @@ function tdp_register_customizer_content( $wp_customize ) {
 add_action( 'customize_register', 'tdp_register_customizer_content' );
 
 /**
+ * Pulls free-form personal info from a WP Page titled "AI Knowledge Base"
+ * (slug: ai-knowledge-base). This is where I can add anything the
+ * structured customizer fields cover — age, location, strengths,
+ * soft skills, etc. — without needing new custom fields every time.
+ */
+function tdp_get_knowledge_base_for_ai() {
+	$page = get_page_by_path( 'ai-knowledge-base' );
+
+	if ( ! $page || empty( $page->post_content ) ) {
+		return '';
+	}
+
+	return wp_strip_all_tags( $page->post_content );
+}
+
+/**
  * Returns bio, expertise, experience, and contact info as structured
  * data for the AI — reads from the SAME theme_mods as the Customizer
  * above, so it always mirrors what's live on the site.
@@ -572,17 +588,19 @@ function tdp_handle_ai_ask( $request ) {
 		return new WP_Error( 'no_question', 'Please include a question.', array( 'status' => 400 ) );
 	}
 
-	$projects = tdp_get_projects_for_ai();
-	$site     = tdp_get_site_context_for_ai();
+	$projects       = tdp_get_projects_for_ai();
+	$site           = tdp_get_site_context_for_ai();
+	$knowledge_base = tdp_get_knowledge_base_for_ai();
 
 	$prompt = "You are a helpful assistant on Anthony (Tony) Manansala's WordPress developer portfolio. "
-		. "Answer visitor questions about Tony ONLY using the data below (his bio, expertise, work experience, contact info, and projects). "
+		. "Answer visitor questions about Tony ONLY using the data below (his bio, expertise, work experience, contact info, additional info, and projects). "
 		. "Be concise and friendly. If something isn't covered by the data, say you're not sure rather than guessing.\n\n"
 		. "BIO:\n" . $site['bio']
 		. "\n\nEXPERTISE (JSON):\n" . wp_json_encode( $site['expertise'] )
 		. "\n\nEXPERIENCE (JSON):\n" . wp_json_encode( $site['experience'] )
 		. "\n\nCONTACT (JSON):\n" . wp_json_encode( $site['contact'] )
 		. "\n\nPROJECTS (JSON):\n" . wp_json_encode( $projects )
+		. ( $knowledge_base ? "\n\nADDITIONAL INFO ABOUT TONY:\n" . $knowledge_base : '' )
 		. "\n\nVISITOR QUESTION: " . $question;
 
 	$result = tdp_call_gemini( $prompt );
@@ -624,18 +642,20 @@ function tdp_handle_ai_job_match( $request ) {
 		return new WP_Error( 'job_description_too_long', 'That job description is too long — please paste up to ~6000 characters.', array( 'status' => 400 ) );
 	}
 
-	$projects = tdp_get_projects_for_ai();
-	$site     = tdp_get_site_context_for_ai();
+	$projects       = tdp_get_projects_for_ai();
+	$site           = tdp_get_site_context_for_ai();
+	$knowledge_base = tdp_get_knowledge_base_for_ai();
 
 	$prompt = "You are a career-matching assistant on Anthony (Tony) Manansala's WordPress developer portfolio. "
 		. "A recruiter or hiring manager has pasted a job description below. "
-		. "Using ONLY Tony's real data below (bio, expertise, experience, and projects), write a 3-4 sentence 'why I'm a fit' summary written in first person as Tony, "
+		. "Using ONLY Tony's real data below (bio, expertise, experience, additional info, and projects), write a 3-4 sentence 'why I'm a fit' summary written in first person as Tony, "
 		. "highlighting the specific skills, experience, projects, or tech stack that genuinely match the job description. "
 		. "Be honest — if the match is weak or partial, say so briefly rather than overselling. Do not invent skills or projects not in the data.\n\n"
 		. "BIO:\n" . $site['bio']
 		. "\n\nEXPERTISE (JSON):\n" . wp_json_encode( $site['expertise'] )
 		. "\n\nEXPERIENCE (JSON):\n" . wp_json_encode( $site['experience'] )
 		. "\n\nPROJECTS (JSON):\n" . wp_json_encode( $projects )
+		. ( $knowledge_base ? "\n\nADDITIONAL INFO ABOUT TONY:\n" . $knowledge_base : '' )
 		. "\n\nJOB DESCRIPTION:\n" . $job_description;
 
 	$result = tdp_call_gemini( $prompt );
