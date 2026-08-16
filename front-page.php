@@ -103,7 +103,15 @@ get_header();
 			<a class="tdp-btn-primary" href="mailto:<?php echo esc_attr( get_theme_mod( 'tdp_contact_email', '' ) ); ?>">Email me</a>
 			<a href="<?php echo esc_url( get_theme_mod( 'tdp_contact_github', '' ) ); ?>" target="_blank" rel="noopener">GitHub</a>
 			<a href="<?php echo esc_url( get_theme_mod( 'tdp_contact_linkedin', '' ) ); ?>" target="_blank" rel="noopener">LinkedIn</a>
-			<a href="<?php echo esc_url( get_theme_mod( 'tdp_contact_main_portfolio', '' ) ); ?>" target="_blank" rel="noopener">Main portfolio</a>
+			<?php $calendly = get_theme_mod( 'tdp_contact_calendly', '' ); ?>
+				<?php if ( $calendly ) : ?>
+					<a href="<?php echo esc_url( $calendly ); ?>" target="_blank" rel="noopener">Book a call</a>
+				<?php endif; ?>
+
+				<?php $resume = get_theme_mod( 'tdp_contact_resume', '' ); ?>
+				<?php if ( $resume ) : ?>
+					<a href="<?php echo esc_url( $resume ); ?>" target="_blank" rel="noopener" download>Download CV</a>
+				<?php endif; ?>
 		</div>
 	</div>
 </section>

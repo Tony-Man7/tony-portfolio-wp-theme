@@ -322,13 +322,55 @@ function initAiWidget() {
 	var input  = document.getElementById('tdp-ai-input');
 	var sendBtn = form.querySelector('.tdp-ai-send');
 
+	// Escapes HTML first (so raw AI text can never inject real tags),
+	// then converts a small safe subset of markdown: **bold** and
+	// [label](https://url) links. Only http(s) links are allowed.
+	function renderMarkdownLite(text) {
+		var escaped = text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+
+		escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, function (match, label, url) {
+			return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
+		});
+
+		escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+		return escaped;
+	}
+
 	function appendMessage(text, type) {
 		var el = document.createElement('div');
 		el.className = 'tdp-ai-message tdp-ai-message--' + type;
-		el.textContent = text;
+		if (type === 'bot') {
+			el.innerHTML = renderMarkdownLite(text);
+		} else {
+			el.textContent = text;
+		}
 		thread.appendChild(el);
 		thread.scrollTop = thread.scrollHeight;
 		return el;
+	}
+
+	function appendActions(actions) {
+		var row = document.createElement('div');
+		row.className = 'tdp-ai-actions';
+
+		actions.forEach(function (action) {
+			var btn = document.createElement('a');
+			btn.className = 'tdp-ai-action-btn';
+			btn.href = action.url;
+			btn.target = '_blank';
+			btn.rel = 'noopener noreferrer';
+			btn.textContent = action.label;
+			row.appendChild(btn);
+		});
+
+		thread.appendChild(row);
+		thread.scrollTop = thread.scrollHeight;
 	}
 
 	function showTyping() {
@@ -366,6 +408,9 @@ function initAiWidget() {
 				hideTyping();
 				if (result.ok && result.data.answer) {
 					appendMessage(result.data.answer, 'bot');
+					if (result.data.actions && result.data.actions.length) {
+						appendActions(result.data.actions);
+					}
 				} else {
 					appendMessage(result.data.message || 'Something went wrong. Please try again.', 'error');
 				}
@@ -407,7 +452,7 @@ function initAiWidget() {
 			.then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
 			.then(function (result) {
 				if (result.ok && result.data.summary) {
-					jobResult.textContent = result.data.summary;
+					jobResult.innerHTML = renderMarkdownLite(result.data.summary);
 				} else {
 					jobResult.textContent = result.data.message || 'Something went wrong. Please try again.';
 					jobResult.classList.add('is-error');

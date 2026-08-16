@@ -228,7 +228,7 @@ function tdp_register_customizer_content( $wp_customize ) {
 	$wp_customize->add_control( 'tdp_hero_headline', array( 'label' => 'Headline (H1)', 'section' => 'tdp_hero_section', 'type' => 'text' ) );
 
 	$wp_customize->add_setting( 'tdp_hero_role', array(
-		'default'           => "Building sites, CRMs, and SEO-ready front ends for teams and direct clients. Available for freelance projects — WordPress builds, Elementor sites, and front-end fixes.",
+		'default'           => "Building sites, CRMs, and SEO-ready front ends for teams and direct clients. Available for freelance projects — WordPress builds, Custom code and front-end fixes.",
 		'sanitize_callback' => 'sanitize_textarea_field',
 	) );
 	$wp_customize->add_control( 'tdp_hero_role', array( 'label' => 'Role / tagline', 'section' => 'tdp_hero_section', 'type' => 'textarea' ) );
@@ -321,8 +321,15 @@ function tdp_register_customizer_content( $wp_customize ) {
 	$wp_customize->add_setting( 'tdp_contact_linkedin', array( 'default' => 'https://www.linkedin.com/in/anthony-manansala-027691276/', 'sanitize_callback' => 'esc_url_raw' ) );
 	$wp_customize->add_control( 'tdp_contact_linkedin', array( 'label' => 'LinkedIn URL', 'section' => 'tdp_contact_section', 'type' => 'url' ) );
 
-	$wp_customize->add_setting( 'tdp_contact_main_portfolio', array( 'default' => 'https://portfolio-newest.vercel.app/', 'sanitize_callback' => 'esc_url_raw' ) );
-	$wp_customize->add_control( 'tdp_contact_main_portfolio', array( 'label' => 'Main portfolio URL', 'section' => 'tdp_contact_section', 'type' => 'url' ) );
+	$wp_customize->add_setting( 'tdp_contact_calendly', array( 'default' => '', 'sanitize_callback' => 'esc_url_raw' ) );
+	$wp_customize->add_control( 'tdp_contact_calendly', array( 'label' => 'Calendly booking URL', 'section' => 'tdp_contact_section', 'type' => 'url' ) );
+
+	$wp_customize->add_setting( 'tdp_contact_resume', array( 'default' => '', 'sanitize_callback' => 'esc_url_raw' ) );
+	$wp_customize->add_control( new WP_Customize_Upload_Control( $wp_customize, 'tdp_contact_resume', array(
+		'label'     => 'Resume / CV (PDF)',
+		'section'   => 'tdp_contact_section',
+		'mime_type' => 'application/pdf',
+	) ) );
 }
 add_action( 'customize_register', 'tdp_register_customizer_content' );
 
@@ -379,12 +386,13 @@ function tdp_get_site_context_for_ai() {
 		),
 		'expertise'  => $expertise,
 		'experience' => $experience,
-		'contact'    => array(
-			'availability'   => get_theme_mod( 'tdp_contact_availability', '' ),
-			'email'          => get_theme_mod( 'tdp_contact_email', '' ),
-			'github'         => get_theme_mod( 'tdp_contact_github', '' ),
-			'linkedin'       => get_theme_mod( 'tdp_contact_linkedin', '' ),
-			'main_portfolio' => get_theme_mod( 'tdp_contact_main_portfolio', '' ),
+			'contact'      => array(
+			'availability' => get_theme_mod( 'tdp_contact_availability', '' ),
+			'email'        => get_theme_mod( 'tdp_contact_email', '' ),
+			'github'       => get_theme_mod( 'tdp_contact_github', '' ),
+			'linkedin'     => get_theme_mod( 'tdp_contact_linkedin', '' ),
+			'calendly'     => get_theme_mod( 'tdp_contact_calendly', '' ),
+			'resume_url'   => get_theme_mod( 'tdp_contact_resume', '' ),
 		),
 	);
 }
@@ -609,7 +617,26 @@ function tdp_handle_ai_ask( $request ) {
 		return $result['wp_error'];
 	}
 
-	return array( 'answer' => $result['text'] );
+	// Deterministic keyword detection on the visitor's own question —
+	// more reliable than hoping the AI formats a link/button correctly.
+	// Only surfaces an action if the corresponding link is actually set.
+	$actions = array();
+
+	if ( preg_match( '/\b(resume|cv|curriculum vitae)\b/i', $question ) ) {
+		$resume_url = get_theme_mod( 'tdp_contact_resume', '' );
+		if ( $resume_url ) {
+			$actions[] = array( 'label' => 'Download CV', 'url' => $resume_url );
+		}
+	}
+
+	if ( preg_match( '/\b(book|calendly|schedule|meeting|call|consult)\b/i', $question ) ) {
+		$calendly_url = get_theme_mod( 'tdp_contact_calendly', '' );
+		if ( $calendly_url ) {
+			$actions[] = array( 'label' => 'Book a call', 'url' => $calendly_url );
+		}
+	}
+
+	return array( 'answer' => $result['text'], 'actions' => $actions );
 }
 
 /**
