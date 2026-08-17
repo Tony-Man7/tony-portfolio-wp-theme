@@ -465,7 +465,7 @@ function tdp_check_rate_limit() {
 	$global_key   = 'tdp_ai_global_count';
 	$global_count = (int) get_transient( $global_key );
 
-	if ( $global_count >= 12 ) {
+	if ( $global_count >= 20 ) {
 		return new WP_Error( 'rate_limited', 'The AI assistant is busy right now — please try again in a minute.', array( 'status' => 429 ) );
 	}
 
@@ -476,7 +476,7 @@ function tdp_check_rate_limit() {
 	$visitor_key  = 'tdp_ai_visitor_' . md5( $ip );
 	$visitor_count = (int) get_transient( $visitor_key );
 
-	if ( $visitor_count >= 5 ) {
+	if ( $visitor_count >= 15 ) {
 		return new WP_Error( 'rate_limited', 'You\'ve reached the question limit for now — please try again in a few minutes.', array( 'status' => 429 ) );
 	}
 
