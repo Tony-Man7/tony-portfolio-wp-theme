@@ -284,7 +284,7 @@ function tdp_register_customizer_content( $wp_customize ) {
 	) );
 
 	$experience_defaults = array(
-		1 => array( 'period' => 'Present', 'title' => 'Web Developer', 'company' => 'Coliseum Global Sports Venue Alliance — Dubai Media City', 'detail' => 'Handling WordPress development, technical SEO, CRM workflows, and day-to-day technical troubleshooting for a global sports venue platform.' ),
+		1 => array( 'period' => 'Present', 'title' => 'Web Developer', 'company' => 'Coliseum Global Sports Venue Alliance — Dubai Media City', 'detail' => 'Handling WordPress development, technical SEO, CRM workflows, and day-to-day technical troubleshooting for a global sports venue platform — including Management of Women In Venues, a site under the Coliseum umbrella.' ),
 		2 => array( 'period' => 'Ongoing', 'title' => 'Freelance Developer', 'company' => 'Independent — remote, part-time', 'detail' => 'Taking on WordPress builds, Elementor and Gutenberg sites, and front-end fixes for direct clients alongside full-time work.' ),
 		3 => array( 'period' => '2023 – 2024', 'title' => 'Web Developer', 'company' => 'Fbanta Corp. — Philippines', 'detail' => 'Built and maintained e-commerce and marketing sites with HTML, CSS, JavaScript, and PHP. Customized WordPress themes using Elementor, integrated plugins, and designed high-converting landing pages while improving site speed, mobile responsiveness, and usability.' ),
 	);
