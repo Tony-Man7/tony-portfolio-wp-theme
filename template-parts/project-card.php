@@ -20,7 +20,7 @@ $tdp_tech_stack = get_post_meta( get_the_ID(), 'tdp_tech_stack', true );
 			<span class="tdp-project-cat"><?php echo esc_html( $tdp_cats[0]->name ); ?></span>
 		<?php endif; ?>
 		<h3><?php the_title(); ?></h3>
-		<p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 18 ) ); ?></p>
+		
 		<div class="tdp-project-meta">
 			<?php if ( $tdp_role ) : ?><span><?php echo esc_html( $tdp_role ); ?></span><?php endif; ?>
 			<?php if ( $tdp_year ) : ?><span><?php echo esc_html( $tdp_year ); ?></span><?php endif; ?>
