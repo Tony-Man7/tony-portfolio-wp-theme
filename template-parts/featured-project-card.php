@@ -17,10 +17,10 @@ if ( empty( $tdp_gallery ) && has_post_thumbnail() ) {
 <article class="tdp-system-case-study" data-system-panel<?php echo $tdp_is_active ? '' : ' hidden'; ?> role="tabpanel">
 	<div class="tdp-system-visual-column">
 		<header class="tdp-system-visual-heading">
-			<?php if ( $tdp_cats && ! is_wp_error( $tdp_cats ) ) : ?>
+			<!-- <?php if ( $tdp_cats && ! is_wp_error( $tdp_cats ) ) : ?>
 				<span class="tdp-project-cat"><?php echo esc_html( $tdp_cats[0]->name ); ?></span>
-			<?php endif; ?>
-			<h3><?php the_title(); ?></h3>
+			<?php endif; ?> -->
+			<!-- <h3><?php the_title(); ?></h3> -->
 		</header>
 
 	<div class="tdp-proof-deck" data-proof-deck>
