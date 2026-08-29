@@ -37,6 +37,42 @@ get_header();
 	</div>
 </section>
 
+<section class="tdp-section" id="featured-projects">
+	<div class="tdp-wrap">
+		<span class="tdp-eyebrow">ls ./featured-builds</span>
+		<h2>Featured Projects</h2>
+
+		<?php
+		$tdp_featured_projects = new WP_Query( array(
+			'post_type'      => 'tdp_project',
+			'posts_per_page' => 3,
+			'post_status'    => 'publish',
+			'meta_key'       => 'tdp_featured',
+			'meta_value'     => '1',
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		) );
+		?>
+
+		<?php if ( $tdp_featured_projects->have_posts() ) : ?>
+			<div class="tdp-systems" data-systems>
+				<div class="tdp-system-tabs" role="tablist" aria-label="Selected systems">
+					<?php $tdp_tab_index = 0; while ( $tdp_featured_projects->have_posts() ) : $tdp_featured_projects->the_post(); ?>
+						<button class="tdp-system-tab<?php echo 0 === $tdp_tab_index ? ' is-active' : ''; ?>" type="button" role="tab" data-system-tab="<?php echo esc_attr( $tdp_tab_index ); ?>" aria-selected="<?php echo 0 === $tdp_tab_index ? 'true' : 'false'; ?>"><span><?php echo esc_html( str_pad( (string) ( $tdp_tab_index + 1 ), 2, '0', STR_PAD_LEFT ) ); ?></span><?php the_title(); ?></button>
+					<?php $tdp_tab_index++; endwhile; $tdp_featured_projects->rewind_posts(); ?>
+				</div>
+
+				<div class="tdp-system-panels">
+					<?php $tdp_panel_index = 0; while ( $tdp_featured_projects->have_posts() ) : $tdp_featured_projects->the_post();
+						get_template_part( 'template-parts/featured-project-card', null, array( 'is_active' => 0 === $tdp_panel_index ) );
+						$tdp_panel_index++;
+					endwhile; wp_reset_postdata(); ?>
+				</div>
+			</div>
+		<?php endif; ?>
+	</div>
+</section>
+
 <section class="tdp-section" id="work">
 	<div class="tdp-wrap">
 		<span class="tdp-eyebrow">ls ./projects</span>
@@ -47,6 +83,11 @@ get_header();
 			'post_type'      => 'tdp_project',
 			'posts_per_page' => 6,
 			'post_status'    => 'publish',
+			'meta_query'     => array(
+				'relation' => 'OR',
+				array( 'key' => 'tdp_featured', 'compare' => 'NOT EXISTS' ),
+				array( 'key' => 'tdp_featured', 'value' => '1', 'compare' => '!=' ),
+			),
 		) );
 		?>
 

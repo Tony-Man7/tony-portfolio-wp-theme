@@ -225,6 +225,61 @@ document.addEventListener('DOMContentLoaded', function () {
 	setupScrollEffects(document);
 
 	/* ---------------------------------------------------------------
+	 * Selected systems: project tabs plus a swipeable visual proof deck.
+	 * ------------------------------------------------------------- */
+	function initProofDeck(deck) {
+		var cards = Array.from(deck.querySelectorAll('[data-proof-card]'));
+		if (!cards.length) return;
+
+		var index = 0;
+		var count = deck.querySelector('[data-proof-count]');
+		var prev = deck.querySelector('[data-proof-prev]');
+		var next = deck.querySelector('[data-proof-next]');
+		var startX = null;
+
+		function showCard(nextIndex) {
+			index = (nextIndex + cards.length) % cards.length;
+			cards.forEach(function (card, cardIndex) {
+				var distance = (cardIndex - index + cards.length) % cards.length;
+				card.classList.toggle('is-active', distance === 0);
+				card.classList.toggle('is-next', distance === 1);
+				card.classList.toggle('is-after-next', distance === 2);
+			});
+			if (count) count.textContent = String(index + 1).padStart(2, '0') + ' / ' + String(cards.length).padStart(2, '0');
+		}
+
+		showCard(0);
+		if (prev) prev.addEventListener('click', function () { showCard(index - 1); });
+		if (next) next.addEventListener('click', function () { showCard(index + 1); });
+
+		deck.addEventListener('touchstart', function (event) { startX = event.changedTouches[0].clientX; }, { passive: true });
+		deck.addEventListener('touchend', function (event) {
+			if (startX === null) return;
+			var delta = event.changedTouches[0].clientX - startX;
+			if (Math.abs(delta) > 42) showCard(delta < 0 ? index + 1 : index - 1);
+			startX = null;
+		}, { passive: true });
+	}
+
+	var systems = document.querySelector('[data-systems]');
+	if (systems) {
+		var tabs = Array.from(systems.querySelectorAll('[data-system-tab]'));
+		var panels = Array.from(systems.querySelectorAll('[data-system-panel]'));
+
+		function showSystem(index) {
+			tabs.forEach(function (tab, tabIndex) {
+				var active = tabIndex === index;
+				tab.classList.toggle('is-active', active);
+				tab.setAttribute('aria-selected', active ? 'true' : 'false');
+			});
+			panels.forEach(function (panel, panelIndex) { panel.hidden = panelIndex !== index; });
+		}
+
+		tabs.forEach(function (tab, index) { tab.addEventListener('click', function () { showSystem(index); }); });
+		panels.forEach(function (panel) { panel.querySelectorAll('[data-proof-deck]').forEach(initProofDeck); });
+	}
+
+	/* ---------------------------------------------------------------
 	 * "See more projects" — AJAX load, no page reload.
 	 * ------------------------------------------------------------- */
 	var loadMoreBtn = document.getElementById('tdp-load-more');

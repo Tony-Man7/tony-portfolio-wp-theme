@@ -65,6 +65,11 @@ function tdp_load_more_projects() {
 		'posts_per_page' => $per_page,
 		'paged'          => $page,
 		'post_status'    => 'publish',
+		'meta_query'     => array(
+			'relation' => 'OR',
+			array( 'key' => 'tdp_featured', 'compare' => 'NOT EXISTS' ),
+			array( 'key' => 'tdp_featured', 'value' => '1', 'compare' => '!=' ),
+		),
 	) );
 
 	ob_start();
@@ -135,11 +140,20 @@ function tdp_register_project_meta() {
 			'auth_callback'=> function() { return current_user_can( 'edit_posts' ); },
 		) );
 	}
+
+	register_post_meta( 'tdp_project', 'tdp_featured', array(
+		'show_in_rest'  => true,
+		'single'        => true,
+		'type'          => 'boolean',
+		'default'       => false,
+		'auth_callback' => function() { return current_user_can( 'edit_posts' ); },
+	) );
 }
 add_action( 'init', 'tdp_register_project_meta' );
 
 function tdp_project_meta_box() {
 	add_meta_box( 'tdp_project_details', 'Project Details', 'tdp_project_meta_box_html', 'tdp_project', 'side', 'default' );
+	add_meta_box( 'tdp_project_gallery', 'Case Study Gallery', 'tdp_project_gallery_meta_box_html', 'tdp_project', 'normal', 'high' );
 }
 add_action( 'add_meta_boxes', 'tdp_project_meta_box' );
 
@@ -149,6 +163,7 @@ function tdp_project_meta_box_html( $post ) {
 	$year   = get_post_meta( $post->ID, 'tdp_year', true );
 	$tech_stack = get_post_meta( $post->ID, 'tdp_tech_stack', true );
 	$url    = get_post_meta( $post->ID, 'tdp_project_url', true );
+	$featured = (bool) get_post_meta( $post->ID, 'tdp_featured', true );
 	wp_nonce_field( 'tdp_save_project_meta', 'tdp_project_meta_nonce' );
 	?>
 	<p><label>Client<br><input type="text" style="width:100%" name="tdp_client" value="<?php echo esc_attr( $client ); ?>"></label></p>
@@ -156,8 +171,49 @@ function tdp_project_meta_box_html( $post ) {
 	<p><label>Year<br><input type="text" style="width:100%" name="tdp_year" value="<?php echo esc_attr( $year ); ?>"></label></p>
 	<p><label>Tech Stack<br><input type="text" style="width:100%" name="tdp_tech_stack" value="<?php echo esc_attr( $tech_stack ); ?>"></label></p>
 	<p><label>Live URL<br><input type="url" style="width:100%" name="tdp_project_url" value="<?php echo esc_attr( $url ); ?>"></label></p>
+	<p><label><input type="checkbox" name="tdp_featured" value="1" <?php checked( $featured ); ?>> Feature in “Selected Systems” on homepage</label></p>
 	<?php
 }
+
+/**
+ * Reusable proof-image gallery for the Selected Systems deck.
+ * Image IDs preserve the manually chosen order; labels are pipe-separated.
+ */
+function tdp_project_gallery_meta_box_html( $post ) {
+	$ids    = get_post_meta( $post->ID, 'tdp_case_study_gallery', true );
+	$labels = get_post_meta( $post->ID, 'tdp_case_study_gallery_labels', true );
+	$ids    = array_filter( array_map( 'absint', explode( ',', (string) $ids ) ) );
+	?>
+	<p>Select the proof images that should appear in this project's homepage deck. Drag cards to set the slide order.</p>
+	<div class="tdp-gallery-field" data-gallery-field>
+		<input type="hidden" class="tdp-gallery-ids" name="tdp_case_study_gallery" value="<?php echo esc_attr( implode( ',', $ids ) ); ?>">
+		<button type="button" class="button button-secondary tdp-gallery-select">Select case-study images</button>
+		<ul class="tdp-gallery-list">
+			<?php foreach ( $ids as $id ) : ?>
+				<li class="tdp-gallery-item" data-id="<?php echo esc_attr( $id ); ?>">
+					<?php echo wp_get_attachment_image( $id, 'thumbnail' ); ?>
+					<button type="button" class="button-link-delete tdp-gallery-remove" aria-label="Remove image">Remove</button>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</div>
+	<p><label><strong>Slide labels</strong><br>
+		<input type="text" class="widefat" name="tdp_case_study_gallery_labels" value="<?php echo esc_attr( $labels ); ?>" placeholder="Sales Page | Mobile Experience | Checkout | Automation">
+	</label><br><small>Use a <code>|</code> between labels. Keep the same order as the images.</small></p>
+	<?php
+}
+
+function tdp_enqueue_project_gallery_admin_assets( $hook ) {
+	if ( ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) return;
+	$screen = get_current_screen();
+	if ( ! $screen || 'tdp_project' !== $screen->post_type ) return;
+
+	wp_enqueue_media();
+	wp_enqueue_script( 'jquery-ui-sortable' );
+	wp_enqueue_script( 'tdp-project-gallery-admin', get_template_directory_uri() . '/assets/js/admin-project-gallery.js', array( 'jquery', 'jquery-ui-sortable' ), filemtime( get_template_directory() . '/assets/js/admin-project-gallery.js' ), true );
+	wp_add_inline_style( 'common', '.tdp-gallery-list{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.tdp-gallery-item{width:132px;position:relative;border:1px solid #dcdcde;padding:6px;background:#fff;cursor:move}.tdp-gallery-item img{display:block;width:100%;height:92px;object-fit:cover}.tdp-gallery-remove{display:block;margin-top:6px}' );
+}
+add_action( 'admin_enqueue_scripts', 'tdp_enqueue_project_gallery_admin_assets' );
 
 function tdp_save_project_meta( $post_id ) {
 	if ( ! isset( $_POST['tdp_project_meta_nonce'] ) || ! wp_verify_nonce( $_POST['tdp_project_meta_nonce'], 'tdp_save_project_meta' ) ) return;
@@ -167,6 +223,11 @@ function tdp_save_project_meta( $post_id ) {
 			update_post_meta( $post_id, $field, sanitize_text_field( $_POST[ $field ] ) );
 		}
 	}
+	update_post_meta( $post_id, 'tdp_featured', isset( $_POST['tdp_featured'] ) ? '1' : '0' );
+	$gallery_ids = isset( $_POST['tdp_case_study_gallery'] ) ? explode( ',', wp_unslash( $_POST['tdp_case_study_gallery'] ) ) : array();
+	$gallery_ids = array_filter( array_map( 'absint', $gallery_ids ) );
+	update_post_meta( $post_id, 'tdp_case_study_gallery', implode( ',', $gallery_ids ) );
+	update_post_meta( $post_id, 'tdp_case_study_gallery_labels', isset( $_POST['tdp_case_study_gallery_labels'] ) ? sanitize_text_field( wp_unslash( $_POST['tdp_case_study_gallery_labels'] ) ) : '' );
 }
 add_action( 'save_post_tdp_project', 'tdp_save_project_meta' );
 
