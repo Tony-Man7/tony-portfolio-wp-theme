@@ -10,8 +10,14 @@ $tdp_role = get_post_meta( get_the_ID(), 'tdp_role', true );
 $tdp_year = get_post_meta( get_the_ID(), 'tdp_year', true );
 $tdp_tech_stack = get_post_meta( get_the_ID(), 'tdp_tech_stack', true );
 
+$tdp_live_url = get_post_meta( get_the_ID(), 'tdp_project_url', true );
+
 ?>
-<a class="tdp-project-card" href="<?php the_permalink(); ?>">
+<?php if ( $tdp_live_url ) : ?>
+	<a class="tdp-project-card" href="<?php echo esc_url( $tdp_live_url ); ?>" target="_blank" rel="noopener">
+<?php else : ?>
+	<article class="tdp-project-card">
+<?php endif; ?>
 	<?php if ( has_post_thumbnail() ) : ?>
 		<div class="tdp-project-thumb"><?php the_post_thumbnail( 'medium_large' ); ?></div>
 	<?php endif; ?>
@@ -33,4 +39,8 @@ $tdp_tech_stack = get_post_meta( get_the_ID(), 'tdp_tech_stack', true );
 			</div>
 		<?php endif; ?>
 	</div>
-</a>
+<?php if ( $tdp_live_url ) : ?>
+	</a>
+<?php else : ?>
+	</article>
+<?php endif; ?>
